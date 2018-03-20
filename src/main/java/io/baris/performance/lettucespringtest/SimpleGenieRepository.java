@@ -17,9 +17,9 @@ public class SimpleGenieRepository implements GenieRepository {
         throw new RuntimeException("this should not happen");
     }
 
-    @CachePut(value = "GeniesJedis", key = "#Genie.getId()", cacheManager = SimpleGenieRepository.JEDIS_CACHE_NAME)
-    public void createGenieJedis(Genie Genie) {
-        //
+    @CachePut(value = "GeniesJedis", key = "#genie.getId()", cacheManager = SimpleGenieRepository.JEDIS_CACHE_NAME)
+    public Genie createGenieJedis(Genie genie) {
+        return genie;
     }
 
     @Cacheable(value = "GeniesLettuce", cacheManager = SimpleGenieRepository.LETTUCE_CACHE_NAME)
@@ -29,9 +29,9 @@ public class SimpleGenieRepository implements GenieRepository {
         throw new RuntimeException("this should not happen");
     }
 
-    @CachePut(value = "GeniesLettuce", key = "#Genie.getId()", cacheManager = SimpleGenieRepository.LETTUCE_CACHE_NAME)
-    public void createGenieLettuce(Genie Genie) {
-        //
+    @CachePut(value = "GeniesLettuce", key = "#genie.getId()", cacheManager = SimpleGenieRepository.LETTUCE_CACHE_NAME)
+    public Genie createGenieLettuce(Genie genie) {
+        return genie;
     }
 
 }

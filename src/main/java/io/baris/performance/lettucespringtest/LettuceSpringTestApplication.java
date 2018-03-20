@@ -18,7 +18,7 @@ public class LettuceSpringTestApplication {
     private static final int TOTAL_OPERATION_COUNT = 10000;
     private static final int THREAD_COUNT = 100;
     @Autowired
-    private GenieRepository GenieRepository;
+    private GenieRepository genieRepository;
 
     public static void main(String[] args) throws ExecutionException, InterruptedException {
         ApplicationContext context
@@ -26,6 +26,14 @@ public class LettuceSpringTestApplication {
 
         LettuceSpringTestApplication app = context.getBean(LettuceSpringTestApplication.class);
         app.start();
+    }
+
+    private void start() throws ExecutionException, InterruptedException {
+        System.out.println("Thread count:" + THREAD_COUNT);
+        System.out.println("Operation count for each thread:" + TOTAL_OPERATION_COUNT);
+        testMultiThread(generateLoadTester(genieRepository::createGenieJedis, genieRepository::getByIdJedis, "jedis"));
+        System.out.println("---------------");
+        testMultiThread(generateLoadTester(genieRepository::createGenieLettuce, genieRepository::getByIdLettuce, "lettuce"));
     }
 
     private static void testMultiThread(Callable<Object> loadTest) throws ExecutionException, InterruptedException {
@@ -42,21 +50,13 @@ public class LettuceSpringTestApplication {
         }
     }
 
-    private void start() throws ExecutionException, InterruptedException {
-        System.out.println("Thread count:" + THREAD_COUNT);
-        System.out.println("Operation count for each thread:" + TOTAL_OPERATION_COUNT);
-        testMultiThread(generateLoadTester(GenieRepository::createGenieJedis, GenieRepository::getByIdJedis, "jedis"));
-        System.out.println("---------------");
-        testMultiThread(generateLoadTester(GenieRepository::createGenieLettuce, GenieRepository::getByIdLettuce, "lettuce"));
-    }
-
     private Callable<Object> generateLoadTester(RedisPutAction redisPutAction, RedisGetAction redisGetAction, String cacheType) {
         return () -> {
             final long begin = System.nanoTime();
             for (int n = 0; n <= TOTAL_OPERATION_COUNT; n++) {
                 String key = UUID.randomUUID().toString();
                 final Genie Genie = new Genie().setName(UUID.randomUUID().toString()).setId(key);
-                redisPutAction.createGenie(Genie);
+                Genie genie = redisPutAction.createGenie(Genie);
                 final Genie byIdLettuce = redisGetAction.getGenie(key);
             }
             System.out.println(Thread.currentThread().getName() + " took :" + TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - begin) + " ms for " + cacheType);
@@ -66,7 +66,7 @@ public class LettuceSpringTestApplication {
 
     @FunctionalInterface
     private interface RedisPutAction {
-        void createGenie(Genie Genie);
+        Genie createGenie(Genie genie);
     }
 
     @FunctionalInterface

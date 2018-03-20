@@ -4,9 +4,9 @@ public interface GenieRepository {
 
     Genie getByIdJedis(String isbn);
 
-    void createGenieJedis(Genie Genie);
+    Genie createGenieJedis(Genie Genie);
 
-    void createGenieLettuce(Genie Genie);
+    Genie createGenieLettuce(Genie Genie);
 
     Genie getByIdLettuce(String isbn);
 
